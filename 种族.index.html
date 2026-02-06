@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D种族测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #8B4513;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .question {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .options {
+            margin-top: 10px;
+        }
+        .option {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        button {
+            display: block;
+            margin: 30px auto;
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            display: none;
+            background-color: #f8f8f8;
+            border-left: 5px solid #8B4513;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .race-title {
+            color: #8B4513;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .race-description {
+            line-height: 1.6;
+        }
+        .character-img {
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            display: block;
+            border-radius: 5px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>D&D种族测试</h1>
+        <div class="subtitle">找出最适合你的龙与地下城种族</div>
+    </header>
+
+    <div id="quiz">
+        <!-- 问题将通过JavaScript动态生成 -->
+    </div>
+
+    <button onclick="calculateResult()">查看我的种族结果</button>
+
+    <div id="result">
+        <div class="race-title" id="race-name"></div>
+        <img id="race-image" class="character-img" src="" alt="种族形象">
+        <div class="race-description" id="race-description"></div>
+    </div>
+
+    <footer>
+        <p>© 2023 D&D种族测试 | 基于《龙与地下城》5e核心种族</p>
+    </footer>
+
+    <script>
+        // 问题数据
+        const questions = [
+            {
+                text: "你更向往哪种生活环境？",
+                options: [
+                    "A. 森林或自然圣地",
+                    "B. 繁华的城市或学院",
+                    "C. 地下洞穴或山脉",
+                    "D. 草原或开阔的荒野"
+                ]
+            },
+            {
+                text: "你更倾向于哪种身体特质？",
+                options: [
+                    "A. 灵巧敏捷，擅长隐蔽",
+                    "B. 智力超群，学习能力强",
+                    "C. 强壮坚韧，抗打击",
+                    "D. 速度惊人，耐力好"
+                ]
+            },
+            {
+                text: "你更擅长的社交方式是？",
+                options: [
+                    "A. 幽默风趣，喜欢恶作剧",
+                    "B. 理性辩论，追求知识",
+                    "C. 直接坦率，重视荣誉",
+                    "D. 热情豪爽，爱交朋友"
+                ]
+            },
+            {
+                text: "你更喜欢的魔法类型是？",
+                options: [
+                    "A. 自然魔法（如德鲁伊法术）",
+                    "B. 奥术魔法（如法师法术）",
+                    "C. 抗魔或天生魔法抗性",
+                    "D. 简单实用的天赋能力"
+                ]
+            },
+            {
+                text: "面对敌人时，你的第一反应是？",
+                options: [
+                    "A. 隐蔽偷袭或设置陷阱",
+                    "B. 分析弱点再施法",
+                    "C. 正面硬刚",
+                    "D. 快速机动，游击战"
+                ]
+            },
+            {
+                text: "你更重视哪种价值观？",
+                options: [
+                    "A. 自由与冒险精神",
+                    "B. 智慧与创新",
+                    "C. 传统与家族荣誉",
+                    "D. 忠诚与群体合作"
+                ]
+            },
+            {
+                text: "你的睡眠习惯更接近？",
+                options: [
+                    "A. 浅眠，容易惊醒",
+                    "B. 熬夜研究或阅读",
+                    "C. 深度睡眠，雷打不动",
+                    "D. 随时能睡，随时能醒"
+                ]
+            },
+            {
+                text: "你对黑暗的态度是？",
+                options: [
+                    "A. 习惯夜间活动",
+                    "B. 用魔法光源解决问题",
+                    "C. 完全不怕黑",
+                    "D. 依赖火把或自然光"
+                ]
+            },
+            {
+                text: "你更倾向于哪种寿命观？",
+                options: [
+                    "A. 寿命较短，但活得很精彩",
+                    "B. 寿命漫长，追求知识积累",
+                    "C. 寿命中等，重视传承",
+                    "D. 随遇而安，不计较时间"
+                ]
+            },
+            {
+                text: "你更喜欢的武器类型是？",
+                options: [
+                    "A. 短剑或弓箭",
+                    "B. 法杖或魔导书",
+                    "C. 战斧或重锤",
+                    "D. 长矛或弯刀"
+                ]
+            },
+            {
+                text: "你对外表的态度是？",
+                options: [
+                    "A. 喜欢华丽或独特的装饰",
+                    "B. 实用为主，偶尔研究服饰文化",
+                    "C. 朴素但注重象征性纹饰",
+                    "D. 自然随意，不刻意打扮"
+                ]
+            },
+            {
+                text: "你更可能选择的职业是？",
+                options: [
+                    "A. 游侠或盗贼",
+                    "B. 法师或工匠",
+                    "C. 战士或圣骑士",
+                    "D. 野蛮人或吟游诗人"
+                ]
+            },
+            {
+                text: "你对其他种族的态度是？",
+                options: [
+                    "A. 好奇但保持距离",
+                    "B. 乐于交流知识",
+                    "C. 信任需慢慢建立",
+                    "D. 一见如故"
+                ]
+            },
+            {
+                text: "你更害怕哪种威胁？",
+                options: [
+                    "A. 失去自由",
+                    "B. 无知或愚昧",
+                    "C. 背叛",
+                    "D. 孤独"
+                ]
+            },
+            {
+                text: "你的人生目标是？",
+                options: [
+                    "A. 探索未知领域",
+                    "B. 掌握终极真理",
+                    "C. 守护重要的人或地",
+                    "D. 享受当下的快乐"
+                ]
+            }
+        ];
+
+        // 种族数据
+        const races = {
+            "A": {
+                name: "精灵 (Elf)",
+                image: "https://www.dndbeyond.com/avatars/thumbnails/6/342/420/618/636271697319361794.png",
+                description: "优雅而神秘的精灵与自然有着深厚的联系。他们拥有敏锐的感官、与生俱来的魔法天赋和几乎无限的寿命。精灵通常身材修长，面容精致，生活在森林或与世隔绝的精灵城市中。"
+            },
+            "B": {
+                name: "人类 (Human)",
+                image: "https://www.dndbeyond.com/avatars/thumbnails/6/324/420/618/636271697053275286.png",
+                description: "人类是最具适应性和多样性的种族。他们可能没有其他种族那样的特殊天赋，但他们的雄心、创造力和适应能力使他们能够在任何环境中茁壮成长。人类社会遍布世界各地，形态各异。"
+            },
+            "C": {
+                name: "矮人 (Dwarf)",
+                image: "https://www.dndbeyond.com/avatars/thumbnails/6/339/420/618/636271697269665920.png",
+                description: "矮人是坚韧不拔的战士和能工巧匠，以他们的耐力、对毒药的抵抗力和对金属工艺的精通而闻名。他们生活在地下堡垒或山脉中，重视传统、家族荣誉和酿造优质啤酒。"
+            },
+            "D": {
+                name: "半兽人 (Half-Orc)",
+                image: "https://www.dndbeyond.com/avatars/thumbnails/6/343/420/618/636271697367209261.png",
+                description: "半兽人结合了兽人的力量和人类的适应力。他们通常体格健壮，有突出的獠牙和粗糙的皮肤。尽管有时会被误解，但半兽人拥有强大的战斗本能和不屈不挠的精神。"
+            }
+        };
+
+        // 渲染问题
+        function renderQuestions() {
+            let html = '';
+            questions.forEach((question, index) => {
+                html += `
+                    <div class="question">
+                        <h3>${index + 1}. ${question.text}</h3>
+                        <div class="options">
+                `;
+                
+                question.options.forEach((option, optionIndex) => {
+                    html += `
+                        <div class="option">
+                            <input type="radio" id="q${index}o${optionIndex}" name="q${index}" value="${option.charAt(0)}">
+                            <label for="q${index}o${optionIndex}">${option.substring(3)}</label>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            document.getElementById('quiz').innerHTML = html;
+        }
+
+        // 计算结果
+        function calculateResult() {
+            const scores = { A: 0, B: 0, C: 0, D: 0 };
+            let answeredAll = true;
+            
+            // 计算每个选项的得分
+            for (let i = 0; i < questions.length; i++) {
+                const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!selectedOption) {
+                    answeredAll = false;
+                    alert(`请回答第 ${i + 1} 题`);
+                    return;
+                }
+                scores[selectedOption.value]++;
+            }
+            
+            if (answeredAll) {
+                // 找出得分最高的选项
+                let maxScore = 0;
+                let result = 'A';
+                
+                for (const [key, value] of Object.entries(scores)) {
+                    if (value > maxScore) {
+                        maxScore = value;
+                        result = key;
+                    }
+                }
+                
+                // 显示结果
+                document.getElementById('race-name').textContent = races[result].name;
+                document.getElementById('race-image').src = races[result].image;
+                document.getElementById('race-image').alt = races[result].name;
+                document.getElementById('race-description').textContent = races[result].description;
+                document.getElementById('result').style.display = 'block';
+                
+                // 滚动到结果位置
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 页面加载时渲染问题
+        window.onload = renderQuestions;
+    </script>
+</body>
+</html>
